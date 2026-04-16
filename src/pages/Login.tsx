@@ -64,7 +64,7 @@ const Login = () => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: name }, emailRedirectTo: `${window.location.origin}/inicio` },
+        options: { data: { full_name: name }, emailRedirectTo: 'https://ispk-digital-lib.vercel.app' },
       });
       if (error) {
         toast({ title: "Erro ao registar", description: error.message, variant: "destructive" });
@@ -150,7 +150,7 @@ const Login = () => {
                   }
                   setLoading(true);
                   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: `${window.location.origin}/reset-password`,
+                    redirectTo: 'https://ispk-digital-lib.vercel.app/reset-password',
                   });
                   if (error) {
                     toast({ title: "Erro", description: error.message, variant: "destructive" });
