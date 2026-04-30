@@ -19,6 +19,7 @@ const AdminBooks = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editingBook, setEditingBook] = useState<any | null>(null);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -98,12 +99,12 @@ const AdminBooks = () => {
     if (!title || !author) return;
     setSaving(true);
 
-    let pdfUrl: string | null = null;
-    let coverUrl: string | null = null;
+    let pdfUrl: string | null = editingBook?.pdf_url || null;
+    let coverUrl: string | null = editingBook?.cover_image_url || null;
     const timestamp = Date.now();
 
     try {
-      // Upload PDF
+      // Upload PDF if it was changed
       if (pdfFile) {
         const pdfPath = `pdfs/${timestamp}-${pdfFile.name}`;
         const { error: pdfError } = await supabase.storage.from("books").upload(pdfPath, pdfFile, { contentType: "application/pdf" });
@@ -112,7 +113,7 @@ const AdminBooks = () => {
         pdfUrl = pdfPublic.publicUrl;
       }
 
-      // Upload cover
+      // Upload cover if it was changed
       if (coverFile) {
         const coverPath = `covers/${timestamp}-cover.jpg`;
         const { error: coverError } = await supabase.storage.from("books").upload(coverPath, coverFile, { contentType: coverFile.type });
@@ -121,8 +122,9 @@ const AdminBooks = () => {
         coverUrl = coverPublic.publicUrl;
       }
 
-      const { error } = await supabase.from("books").insert({
-        title, author,
+      const bookPayload = {
+        title,
+        author,
         publication_year: year ? parseInt(year) : null,
         category_id: catId || null,
         description: description || null,
@@ -132,12 +134,16 @@ const AdminBooks = () => {
         cover_image_url: coverUrl,
         digital: !!pdfUrl,
         access_type: accessType as any,
-      });
+      };
 
-      if (error) {
-        toast({ title: "Erro", description: error.message, variant: "destructive" });
+      const result = editingBook
+        ? await supabase.from("books").update(bookPayload).eq("id", editingBook.id)
+        : await supabase.from("books").insert(bookPayload);
+
+      if (result.error) {
+        toast({ title: "Erro", description: result.error.message, variant: "destructive" });
       } else {
-        toast({ title: "Livro adicionado com sucesso" });
+        toast({ title: editingBook ? "Livro atualizado" : "Livro adicionado com sucesso" });
         resetForm();
         setDialogOpen(false);
         fetchData();
@@ -149,14 +155,35 @@ const AdminBooks = () => {
   }
 
   function resetForm() {
+    setEditingBook(null);
     setTitle(""); setAuthor(""); setYear(""); setCatId(""); setDescription(""); setIsbn(""); setPages("");
     setAccessType("online_public"); setPdfFile(null); setCoverFile(null); setCoverPreview(null);
   }
 
   async function deleteBook(id: string) {
-    await supabase.from("books").delete().eq("id", id);
-    toast({ title: "Livro removido" });
-    fetchData();
+    const { error } = await supabase.from("books").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao eliminar livro", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Livro removido" });
+      fetchData();
+    }
+  }
+
+  function editBook(book: any) {
+    setEditingBook(book);
+    setTitle(book.title || "");
+    setAuthor(book.author || "");
+    setYear(book.publication_year ? String(book.publication_year) : "");
+    setCatId(book.category_id || "");
+    setDescription(book.description || "");
+    setIsbn(book.isbn || "");
+    setPages(book.pages ? String(book.pages) : "");
+    setAccessType(book.access_type || "online_public");
+    setCoverFile(null);
+    setPdfFile(null);
+    setCoverPreview(book.cover_image_url || null);
+    setDialogOpen(true);
   }
 
   if (loading) {
@@ -176,7 +203,7 @@ const AdminBooks = () => {
               <Button className="gap-2"><Plus className="h-4 w-4" /> Novo Livro</Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-              <DialogHeader><DialogTitle>Adicionar Livro</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{editingBook ? "Editar Livro" : "Adicionar Livro"}</DialogTitle></DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2"><Label>Título *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título do livro" /></div>
                 <div className="space-y-2"><Label>Autor *</Label><Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Nome do autor" /></div>
@@ -299,7 +326,7 @@ const AdminBooks = () => {
                     <TableCell className="hidden md:table-cell text-sm text-muted-foreground">{book.categories?.name}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => editBook(book)}><Pencil className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteBook(book.id)}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </TableCell>

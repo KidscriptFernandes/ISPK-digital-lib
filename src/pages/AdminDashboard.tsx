@@ -153,8 +153,9 @@ const AdminDashboard = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: "Gerir Livros", url: "/admin/livros", color: "bg-primary/10 text-primary hover:bg-primary/20" },
-            { label: "Gerir Utilizadores", url: "/admin/utilizadores", color: "bg-secondary/10 text-secondary hover:bg-secondary/20" },
-            { label: "Administradores", url: "/admin/administradores", color: "bg-violet-500/10 text-violet-600 hover:bg-violet-500/20" },
+            { label: "Empréstimos", url: "/admin/emprestimos", color: "bg-secondary/10 text-secondary hover:bg-secondary/20" },
+            { label: "Gerir Utilizadores", url: "/admin/utilizadores", color: "bg-violet-500/10 text-violet-600 hover:bg-violet-500/20" },
+            { label: "Administradores", url: "/admin/administradores", color: "bg-fuchsia-500/10 text-fuchsia-600 hover:bg-fuchsia-500/20" },
             { label: "Categorias & Stats", url: "/admin/definicoes", color: "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20" },
           ].map((link) => (
             <Link

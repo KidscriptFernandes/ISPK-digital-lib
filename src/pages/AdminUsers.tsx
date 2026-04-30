@@ -53,11 +53,33 @@ const AdminUsers = () => {
   }
 
   async function removeUser(userId: string) {
-    // Remove role first then profile (cascade may handle it)
-    await supabase.from("user_roles").delete().eq("user_id", userId);
-    await supabase.from("profiles").delete().eq("user_id", userId);
+    setLoading(true);
+
+    const { error: rolesError } = await supabase.from("user_roles").delete().eq("user_id", userId);
+    if (rolesError) {
+      toast({
+        title: "Erro ao remover papel do usuário",
+        description: rolesError.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    const { error: profileError } = await supabase.from("profiles").delete().eq("user_id", userId);
+    if (profileError) {
+      toast({
+        title: "Erro ao remover perfil do usuário",
+        description: profileError.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     toast({ title: "Utilizador removido" });
-    fetchUsers();
+    await fetchUsers();
+    setLoading(false);
   }
 
   const filtered = users.filter(u =>

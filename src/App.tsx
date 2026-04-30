@@ -18,10 +18,12 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import AdminManagers from "./pages/AdminManagers";
 import AdminCarousel from "./pages/AdminCarousel";
+import AdminLoans from "./pages/AdminLoans";
 import MyLoans from "./pages/MyLoans";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import ChatBotFloating from "./components/ChatBotFloating";
 
 const queryClient = new QueryClient();
 
@@ -49,12 +51,14 @@ const App = () => (
             {/* Admin-only routes */}
             <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/livros" element={<ProtectedRoute adminOnly><AdminBooks /></ProtectedRoute>} />
+            <Route path="/admin/emprestimos" element={<ProtectedRoute adminOnly><AdminLoans /></ProtectedRoute>} />
             <Route path="/admin/utilizadores" element={<ProtectedRoute adminOnly><AdminUsers /></ProtectedRoute>} />
             <Route path="/admin/administradores" element={<ProtectedRoute adminOnly><AdminManagers /></ProtectedRoute>} />
             <Route path="/admin/carrossel" element={<ProtectedRoute adminOnly><AdminCarousel /></ProtectedRoute>} />
             <Route path="/admin/definicoes" element={<ProtectedRoute adminOnly><AdminSettings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ChatBotFloating />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

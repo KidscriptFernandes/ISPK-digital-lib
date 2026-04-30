@@ -26,6 +26,7 @@ const authItems = [
 const adminItems = [
   { title: "Dashboard Admin", url: "/admin", icon: TrendingUp },
   { title: "Gestão de Livros", url: "/admin/livros", icon: BookMarked },
+  { title: "Empréstimos", url: "/admin/emprestimos", icon: ClipboardList },
   { title: "Carrossel", url: "/admin/carrossel", icon: ImageIcon },
   { title: "Utilizadores", url: "/admin/utilizadores", icon: Users },
   { title: "Administradores", url: "/admin/administradores", icon: ShieldCheck },

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppLayout } from "@/components/AppLayout";
 import { ArrowLeft, BookOpen, Download, Calendar, Hash, Layers, Lock, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +20,8 @@ const BookDetail = () => {
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
   const [hasActiveLoan, setHasActiveLoan] = useState(false);
+  const [isReaderOpen, setIsReaderOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -53,6 +56,31 @@ const BookDetail = () => {
       setHasActiveLoan(true);
     }
     setRequesting(false);
+  }
+
+  async function handleDownload() {
+    if (!book?.pdf_url) return;
+    setDownloading(true);
+
+    try {
+      const response = await fetch(book.pdf_url);
+      if (!response.ok) throw new Error("Não foi possível baixar o arquivo.");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${book.title?.replace(/\s+/g, "_") || "livro"}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      toast({ title: "Download iniciado", description: "O PDF está sendo baixado." });
+    } catch (error: any) {
+      toast({ title: "Erro no download", description: error?.message || "Não foi possível iniciar o download." , variant: "destructive" });
+      window.open(book.pdf_url, "_blank");
+    } finally {
+      setDownloading(false);
+    }
   }
 
   if (loading) {
@@ -125,8 +153,8 @@ const BookDetail = () => {
             <div className="flex flex-col gap-3 pt-2">
               {/* Read online */}
               {canReadOnline && (
-                <Button className="gap-2" asChild>
-                  <a href={book.pdf_url} target="_blank" rel="noopener noreferrer"><BookOpen className="h-4 w-4" /> Ler Online</a>
+                <Button className="gap-2" onClick={() => setIsReaderOpen(true)}>
+                  <BookOpen className="h-4 w-4" /> Ler Online
                 </Button>
               )}
 
@@ -146,8 +174,8 @@ const BookDetail = () => {
 
               {/* Download */}
               {canDownload && (
-                <Button variant="outline" className="gap-2" asChild>
-                  <a href={book.pdf_url} download><Download className="h-4 w-4" /> Download</a>
+                <Button variant="outline" className="gap-2" onClick={handleDownload} disabled={downloading}>
+                  <Download className="h-4 w-4" /> {downloading ? "Baixando..." : "Download"}
                 </Button>
               )}
 
@@ -193,6 +221,30 @@ const BookDetail = () => {
             </div>
           </div>
         </motion.div>
+
+        <Dialog open={isReaderOpen} onOpenChange={setIsReaderOpen}>
+          <DialogContent className="w-[95vw] max-w-[95vw] h-[90vh] max-h-[90vh] p-0 overflow-hidden bg-transparent shadow-none">
+            <div className="relative flex h-full w-full flex-col rounded-3xl border border-border bg-card shadow-2xl">
+              <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+                <DialogHeader className="flex-1">
+                  <DialogTitle className="text-base font-semibold">Ler dentro da plataforma</DialogTitle>
+                </DialogHeader>
+                <DialogClose asChild>
+                  <Button variant="ghost" className="h-10 w-10 p-0 rounded-full text-muted-foreground hover:bg-muted/50" aria-label="Fechar leitura">
+                    <span className="text-xl">×</span>
+                  </Button>
+                </DialogClose>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <iframe
+                  src={book.pdf_url}
+                  title={book.title}
+                  className="h-full w-full border-0"
+                />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {related.length > 0 && (
           <div>
