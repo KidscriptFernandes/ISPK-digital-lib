@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppLayout } from "@/components/AppLayout";
-import { ArrowLeft, BookOpen, Download, Calendar, Hash, Layers, Lock, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Download, Calendar, Hash, Layers, Lock, Send, ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,128 @@ const BookDetail = () => {
   const [hasActiveLoan, setHasActiveLoan] = useState(false);
   const [isReaderOpen, setIsReaderOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const saveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Save reading position to localStorage and Supabase
+  async function saveReadingPosition(pageNum: number) {
+    if (!book || !user) return;
+
+    // Save to localStorage for instant access
+    localStorage.setItem(`book_reading_pos_${book.id}`, JSON.stringify({
+      page: pageNum,
+      timestamp: Date.now(),
+    }));
+
+    // Try to save to Supabase for cross-device sync
+    try {
+      const { error } = await supabase
+        .from("reading_positions")
+        .upsert(
+          {
+            book_id: book.id,
+            user_id: user.id,
+            page_number: pageNum,
+            last_read_at: new Date().toISOString(),
+          },
+          { onConflict: "book_id,user_id" }
+        );
+
+      if (error) {
+        console.warn("Failed to save reading position to Supabase:", error);
+      }
+    } catch (error) {
+      console.warn("Error saving reading position:", error);
+    }
+  }
+
+  // Load reading position from localStorage or Supabase
+  async function loadReadingPosition(): Promise<number> {
+    if (!book) return 1;
+
+    // Try localStorage first
+    try {
+      const cached = localStorage.getItem(`book_reading_pos_${book.id}`);
+      if (cached) {
+        const { page } = JSON.parse(cached);
+        return page;
+      }
+    } catch (error) {
+      console.warn("Error reading from localStorage:", error);
+    }
+
+    // Try to load from Supabase if user is logged in
+    if (user) {
+      try {
+        const { data, error } = await supabase
+          .from("reading_positions")
+          .select("page_number")
+          .eq("book_id", book.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.warn("Error loading reading position from Supabase:", error);
+          return 1;
+        }
+
+        if (data?.page_number) {
+          // Save to localStorage for instant access next time
+          localStorage.setItem(`book_reading_pos_${book.id}`, JSON.stringify({
+            page: data.page_number,
+            timestamp: Date.now(),
+          }));
+          return data.page_number;
+        }
+      } catch (error) {
+        console.warn("Error querying Supabase:", error);
+      }
+    }
+
+    return 1;
+  }
+
+  // Handle when reader is opened
+  async function handleReaderOpen() {
+    const savedPage = await loadReadingPosition();
+    setCurrentPage(savedPage);
+    setIsReaderOpen(true);
+  }
+
+  // Handle when reader is closed
+  function handleReaderClose() {
+    // Save position one last time
+    if (currentPage > 1) {
+      saveReadingPosition(currentPage);
+    }
+
+    // Cancel auto-save interval
+    if (saveIntervalRef.current) {
+      clearInterval(saveIntervalRef.current);
+      saveIntervalRef.current = null;
+    }
+
+    setIsReaderOpen(false);
+  }
+
+  // Setup auto-save interval when reader is open
+  useEffect(() => {
+    if (isReaderOpen && user) {
+      // Save reading position every 10 seconds while reading
+      saveIntervalRef.current = setInterval(() => {
+        if (currentPage > 0) {
+          saveReadingPosition(currentPage);
+        }
+      }, 10000);
+
+      return () => {
+        if (saveIntervalRef.current) {
+          clearInterval(saveIntervalRef.current);
+        }
+      };
+    }
+  }, [isReaderOpen, currentPage, user, book]);
 
   useEffect(() => {
     async function load() {
@@ -153,7 +275,7 @@ const BookDetail = () => {
             <div className="flex flex-col gap-3 pt-2">
               {/* Read online */}
               {canReadOnline && (
-                <Button className="gap-2" onClick={() => setIsReaderOpen(true)}>
+                <Button className="gap-2" onClick={handleReaderOpen}>
                   <BookOpen className="h-4 w-4" /> Ler Online
                 </Button>
               )}
@@ -222,22 +344,44 @@ const BookDetail = () => {
           </div>
         </motion.div>
 
-        <Dialog open={isReaderOpen} onOpenChange={setIsReaderOpen}>
+        <Dialog open={isReaderOpen} onOpenChange={handleReaderClose}>
           <DialogContent className="w-[95vw] max-w-[95vw] h-[90vh] max-h-[90vh] p-0 overflow-hidden bg-transparent shadow-none">
             <div className="relative flex h-full w-full flex-col rounded-3xl border border-border bg-card shadow-2xl">
               <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
                 <DialogHeader className="flex-1">
-                  <DialogTitle className="text-base font-semibold">Ler dentro da plataforma</DialogTitle>
+                  <DialogTitle className="text-base font-semibold">
+                    Ler dentro da plataforma {currentPage > 1 && `- Página ${currentPage}`}
+                  </DialogTitle>
                 </DialogHeader>
-                <DialogClose asChild>
-                  <Button variant="ghost" className="h-10 w-10 p-0 rounded-full text-muted-foreground hover:bg-muted/50" aria-label="Fechar leitura">
-                    <span className="text-xl">×</span>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => {
+                      const newPage = Math.max(1, currentPage - 1);
+                      setCurrentPage(newPage);
+                    }}
+                    className="h-10 w-10"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
-                </DialogClose>
+                  <span className="text-sm text-muted-foreground min-w-20 text-center">
+                    Pág {currentPage}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    className="h-10 w-10"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <div className="flex-1 overflow-hidden">
                 <iframe
-                  src={book.pdf_url}
+                  ref={iframeRef}
+                  src={`${book.pdf_url}#page=${currentPage}`}
                   title={book.title}
                   className="h-full w-full border-0"
                 />

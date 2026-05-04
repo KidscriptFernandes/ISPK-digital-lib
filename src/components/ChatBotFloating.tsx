@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Send, X } from "lucide-react";
+import { Send } from "lucide-react";
 import ispkLogo from "@/assets/ispk-logo.jpg";
 
 const defaults = [
@@ -118,9 +118,6 @@ const ChatBotFloating = () => {
               <p className="text-xs text-muted-foreground">Chatbot do ISPK para ajudar com livros e pesquisa.</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
-            <X className="h-4 w-4" />
-          </Button>
         </div>
 
         <div className="flex h-[60vh] flex-col bg-background">
