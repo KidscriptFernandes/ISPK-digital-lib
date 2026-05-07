@@ -14,48 +14,131 @@ const defaults = [
 const createReply = (message: string) => {
   const text = message.toLowerCase();
 
+  if (/(ola|olá|oi|bom dia|boa tarde|boa noite)/.test(text)) {
+    return "Olá 👋 Bem-vindo à Biblioteca Virtual do ISPK. Posso ajudar você a encontrar livros, autores, categorias, downloads, leitura online, empréstimos e muito mais.";
+  }
+
   if (/(ler online|leitura online|visualizar pdf|ler o livro|ver online)/.test(text)) {
-    return "Para ler online, abra a página do livro e clique no botão 'Ler Online'. O PDF será exibido na própria página para você navegar sem sair do site.";
+    return "Para ler online, abra a página do livro e clique no botão 'Ler Online'. O PDF será exibido diretamente na plataforma para leitura rápida e prática sem precisar baixar.";
   }
 
   if (/(download|baixar|salvar|guardar|pdf)/.test(text)) {
-    return "Se o livro tem versão digital, use o botão 'Download' na página do livro. Ele fará o download automático do PDF para o seu computador.";
+    return "Se o livro possui versão digital, utilize o botão 'Download'. O sistema iniciará automaticamente o download do PDF para o seu dispositivo.";
   }
 
   if (/(autor|quem escreveu|escritor|autores)/.test(text)) {
-    return "Procure pelo nome do autor no campo de busca ou abra um livro para ver o autor na ficha. No ISPK, os autores ajudam a encontrar obras relacionadas pela mesma área.";
+    return "Você pode pesquisar pelo nome do autor usando a barra de busca. Na ficha de cada livro também é possível visualizar o autor, obras relacionadas e outras publicações da mesma área.";
   }
 
-  if (/(categoria|gênero|assunto|disciplina|área)/.test(text)) {
-    return "Use as prateleiras e os filtros do catálogo para encontrar livros por tema, curso ou disciplina. Isso facilita buscar materiais específicos para o seu trabalho.";
+  if (/(categoria|gênero|assunto|disciplina|área|curso)/.test(text)) {
+    return "Use as categorias e filtros do catálogo para encontrar livros por curso, disciplina, tema ou área científica. Isso facilita localizar materiais específicos para estudos e pesquisas.";
   }
 
   if (/(disponível|emprestado|disponibilidade)/.test(text)) {
-    return "Na página do livro, a disponibilidade indica se o exemplar físico ainda pode ser retirado. Se estiver emprestado, você pode escolher outro título ou aguardar a devolução.";
+    return "Na página do livro, a disponibilidade mostra se o exemplar físico está livre para empréstimo. Caso esteja emprestado, você poderá aguardar a devolução ou procurar outro exemplar.";
   }
 
   if (/(reserva|solicitação|empréstimo|emprestimo)/.test(text)) {
-    return "Para solicitar um empréstimo, faça login e clique no botão correspondente na página do livro. O administrador validará a solicitação e realizará a reserva do exemplar físico.";
+    return "Para solicitar um empréstimo, faça login na plataforma e clique em 'Solicitar Empréstimo'. O administrador analisará sua solicitação e confirmará a reserva do livro físico.";
+  }
+
+  if (/(renovar|renovação|prorrogar)/.test(text)) {
+    return "Os empréstimos podem ser renovados no painel do usuário após login. Verifique se o livro não possui reservas pendentes antes de solicitar a renovação.";
+  }
+
+  if (/(login|entrar|acesso|conta)/.test(text)) {
+    return "Para acessar sua conta, clique em 'Entrar' e utilize suas credenciais acadêmicas. Após o login, você poderá solicitar empréstimos, renovar livros e acompanhar seu histórico.";
+  }
+
+  if (/(cadastro|registrar|criar conta)/.test(text)) {
+    return "O cadastro é realizado pela administração do ISPK. Caso ainda não tenha acesso, entre em contato com a secretaria ou com o administrador da biblioteca.";
+  }
+
+  if (/(pesquisar|buscar|procurar livro|encontrar livro)/.test(text)) {
+    return "Você pode pesquisar livros pelo título, autor, categoria, palavra-chave ou área de estudo usando a barra de pesquisa principal.";
+  }
+
+  if (/(livros novos|novidades|recentes|últimos livros)/.test(text)) {
+    return "Na seção de novidades você encontrará os livros recentemente adicionados ao catálogo do ISPK.";
+  }
+
+  if (/(biblioteca|acervo|catálogo|catalogo)/.test(text)) {
+    return "O catálogo da Biblioteca Virtual do ISPK reúne livros físicos e digitais organizados por categorias, autores e áreas acadêmicas.";
+  }
+
+  if (/(horário|horario|funcionamento)/.test(text)) {
+    return "O horário de funcionamento da biblioteca pode ser consultado na página principal ou diretamente com a administração do ISPK.";
+  }
+
+  if (/(contato|suporte|ajuda|assistência)/.test(text)) {
+    return "Caso precise de ajuda adicional, entre em contato com a equipe da biblioteca ou utilize o suporte disponível na plataforma.";
+  }
+
+  if (/(multa|penalidade|atraso)/.test(text)) {
+    return "Livros devolvidos fora do prazo podem gerar penalidades definidas pela administração da biblioteca. Consulte seu painel para acompanhar seus empréstimos.";
+  }
+
+  if (/(ebook|livro digital|digital)/.test(text)) {
+    return "Os ebooks disponíveis podem ser lidos online ou baixados em PDF dependendo das permissões do livro.";
+  }
+
+  if (/(tcc|monografia|dissertação|artigo científico|artigo cientifico)/.test(text)) {
+    return "O ISPK também disponibiliza materiais acadêmicos como TCCs, monografias, dissertações e artigos científicos para consulta e pesquisa.";
+  }
+
+  if (/(recomendação|recomendar livro|indicação)/.test(text)) {
+    return "Posso ajudar com recomendações de livros por curso, disciplina ou área de interesse. Basta informar o tema desejado.";
   }
 
   if (/(faq|perguntas frequentes|duvidas|dúvidas)/.test(text)) {
-    return `Perguntas frequentes do ISPK:
+    return `📚 Perguntas Frequentes do ISPK
 
-1. Como buscar livros? Use título, autor ou palavra-chave na busca.
-2. Como ler online? Abra o livro e clique em 'Ler Online'.
-3. Como baixar? Use o botão 'Download' se estiver disponível.
-4. Como solicitar empréstimo? Faça login e clique em 'Solicitar Empréstimo'.
-5. Como renovar? Verifique seu painel de empréstimos após login.`;
+1. Como buscar livros?
+Use título, autor ou palavras-chave na barra de pesquisa.
+
+2. Como ler online?
+Abra o livro e clique em 'Ler Online'.
+
+3. Como baixar livros?
+Clique em 'Download' se disponível.
+
+4. Como solicitar empréstimo?
+Faça login e clique em 'Solicitar Empréstimo'.
+
+5. Como renovar um livro?
+Acesse seu painel de usuário após login.
+
+6. Como verificar disponibilidade?
+Veja o status do livro na página do exemplar.
+
+7. Existem ebooks?
+Sim, alguns livros possuem versão digital em PDF.
+
+8. Posso pesquisar por categoria?
+Sim, utilize filtros e categorias do catálogo.
+
+9. Como acessar minha conta?
+Clique em 'Entrar' e use suas credenciais.
+
+10. O sistema possui suporte?
+Sim, a equipe da biblioteca pode ajudar em caso de dúvidas.`;
   }
 
   const genericAnswers = [
-    "Sou a assistente bibliotecária do ISPK. Pergunte sobre livros, busca, disponibilidade ou leitura online.",
-    "Posso ajudar a encontrar livros por tema, autor ou categoria e orientar como usar o catálogo do ISPK.",
-    "Meu foco é apoiar sua pesquisa e leitura no acervo do ISPK. Pergunte sobre qualquer livro ou processo de busca.",
+    "Sou a assistente virtual da Biblioteca do ISPK 📚. Posso ajudar com livros, autores, downloads, leitura online, empréstimos e pesquisas acadêmicas.",
+    
+    "Posso ajudar você a encontrar livros por tema, categoria, autor ou disciplina e também explicar como utilizar o catálogo do ISPK.",
+    
+    "Meu objetivo é facilitar sua pesquisa e leitura no acervo do ISPK. Pergunte sobre livros, PDFs, disponibilidade ou empréstimos.",
+    
+    "Você pode perguntar sobre leitura online, downloads, autores, categorias, renovação de empréstimos e funcionamento da biblioteca.",
+    
+    "Estou disponível para ajudar estudantes e pesquisadores do ISPK a localizar materiais acadêmicos e utilizar a biblioteca virtual.",
   ];
 
   return genericAnswers[Math.floor(Math.random() * genericAnswers.length)];
 };
+
 
 const ChatBotFloating = () => {
   const [open, setOpen] = useState(false);
