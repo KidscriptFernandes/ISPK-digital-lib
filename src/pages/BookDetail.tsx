@@ -20,6 +20,8 @@ const BookDetail = () => {
   const [loading, setLoading] = useState(true);
   const [requesting, setRequesting] = useState(false);
   const [hasActiveLoan, setHasActiveLoan] = useState(false);
+  const [activeLoanInfo, setActiveLoanInfo] = useState<any>(null);
+  const [bookHasActiveLoan, setBookHasActiveLoan] = useState(false);
   const [isReaderOpen, setIsReaderOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +40,7 @@ const BookDetail = () => {
 
     // Try to save to Supabase for cross-device sync
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("reading_positions")
         .upsert(
           {
@@ -76,7 +78,7 @@ const BookDetail = () => {
     // Try to load from Supabase if user is logged in
     if (user) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from("reading_positions")
           .select("page_number")
           .eq("book_id", book.id)
@@ -153,11 +155,24 @@ const BookDetail = () => {
         const { data: rel } = await supabase.from("books").select("*, categories(name)").eq("category_id", data.category_id).neq("id", id!).limit(3);
         setRelated(rel || []);
       }
-      // Check active loan
+      // Check if current user has an active loan
       if (user && data) {
         const { data: loan } = await supabase.from("book_loans").select("id").eq("book_id", data.id).eq("user_id", user.id).is("return_date", null).maybeSingle();
         setHasActiveLoan(!!loan);
       }
+      
+      // Always check if book has ANY active loan (by any user)
+      if (data) {
+        const { data: loanInfo } = await supabase
+          .from("book_loans")
+          .select("*, profiles(full_name)")
+          .eq("book_id", data.id)
+          .is("return_date", null)
+          .maybeSingle();
+        setActiveLoanInfo(loanInfo);
+        setBookHasActiveLoan(!!loanInfo);
+      }
+      
       // Track view only for authenticated users
       if (user && data) {
         supabase.from("book_views").insert({ book_id: data.id, user_id: user.id });
@@ -169,13 +184,42 @@ const BookDetail = () => {
 
   async function requestLoan() {
     if (!user || !book) return;
+    
+    // Check if book already has an active loan
+    if (bookHasActiveLoan) {
+      toast({ 
+        title: "Livro indisponível", 
+        description: "Este livro já foi emprestado. Aguarde até que seja devolvido.", 
+        variant: "destructive" 
+      });
+      return;
+    }
+    
     setRequesting(true);
     const { error } = await supabase.from("book_loans").insert({ book_id: book.id, user_id: user.id });
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      // Handle the database constraint error
+      if (error.message.includes("empréstimo ativo") || error.message.includes("active")) {
+        toast({ 
+          title: "Livro indisponível", 
+          description: "Este livro já foi emprestado por outro usuário. Aguarde até que seja devolvido.", 
+          variant: "destructive" 
+        });
+      } else {
+        toast({ title: "Erro", description: error.message, variant: "destructive" });
+      }
     } else {
       toast({ title: "Empréstimo solicitado", description: "Dirija-se à biblioteca para levantar o livro." });
       setHasActiveLoan(true);
+      // Refresh loan info to show the new active loan
+      const { data: loanInfo } = await supabase
+        .from("book_loans")
+        .select("*, profiles(full_name)")
+        .eq("book_id", book.id)
+        .is("return_date", null)
+        .maybeSingle();
+      setActiveLoanInfo(loanInfo);
+      setBookHasActiveLoan(!!loanInfo);
     }
     setRequesting(false);
   }
@@ -249,7 +293,7 @@ const BookDetail = () => {
                 <Badge variant="outline" className="text-xs">
                   {accessType === "online_public" && "📖 Leitura Livre"}
                   {accessType === "online_registered" && "📚 Só Cadastrados"}
-                  {accessType === "physical_only" && "🏫 Livro Físico"}
+                  {accessType === "physical_only" && "🏫Apenas Livro Físico"}
                 </Badge>
               </div>
               <h1 className="text-3xl font-bold text-foreground">{book.title}</h1>
@@ -265,11 +309,25 @@ const BookDetail = () => {
             </div>
 
             {/* Availability badge */}
-            <div>
-              <Badge variant={book.available ? "default" : "destructive"}>
-                {book.available ? "Disponível" : "Emprestado"}
-              </Badge>
-              {book.digital && <Badge variant="outline" className="ml-2">Digital</Badge>}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Badge variant={bookHasActiveLoan ? "destructive" : "default"}>
+                  {bookHasActiveLoan ? "Emprestado" : "Disponível"}
+                </Badge>
+                {book.digital && <Badge variant="outline" className="ml-2">Digital</Badge>}
+              </div>
+              
+              {/* Show loan details when book is borrowed */}
+              {bookHasActiveLoan && activeLoanInfo && (
+                <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                  <p className="text-sm font-medium text-destructive">
+                    📚 Livro indisponível - Emprestado
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Aguarde até {new Date(activeLoanInfo.due_date).toLocaleDateString('pt-BR')} para solicitar este livro.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col gap-3 pt-2">
@@ -312,10 +370,19 @@ const BookDetail = () => {
               )}
 
               {/* Physical loan request - only for logged-in users */}
-              {user && book.available && (accessType === "physical_only" || !book.digital) && (
+              {user && (accessType === "physical_only" || !book.digital) && (
                 <div>
                   {hasActiveLoan ? (
                     <Badge variant="outline" className="text-sm py-1.5 px-3">✓ Empréstimo já solicitado</Badge>
+                  ) : bookHasActiveLoan ? (
+                    <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                      <p className="text-sm font-medium text-destructive">
+                        📚 Livro indisponível para empréstimo
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Este livro foi emprestado e estará disponível novamente em {new Date(activeLoanInfo.due_date).toLocaleDateString('pt-BR')}.
+                      </p>
+                    </div>
                   ) : (
                     <Button variant="secondary" className="gap-2" onClick={requestLoan} disabled={requesting}>
                       <Send className="h-4 w-4" /> Solicitar Empréstimo Físico
@@ -345,7 +412,7 @@ const BookDetail = () => {
         </motion.div>
 
         <Dialog open={isReaderOpen} onOpenChange={handleReaderClose}>
-          <DialogContent className="w-[95vw] max-w-[95vw] h-[90vh] max-h-[90vh] p-0 overflow-hidden bg-transparent shadow-none">
+          <DialogContent className="w-full h-full md:w-[95vw] md:max-w-[95vw] md:h-[90vh] md:max-h-[90vh] p-0 overflow-hidden bg-transparent shadow-none">
             <div className="relative flex h-full w-full flex-col rounded-3xl border border-border bg-card shadow-2xl">
               <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
                 <DialogHeader className="flex-1">

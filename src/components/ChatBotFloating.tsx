@@ -192,7 +192,7 @@ const ChatBotFloating = () => {
         </DialogTrigger>
       </div>
 
-      <DialogContent className="w-[92vw] max-w-md p-0 overflow-hidden bg-background">
+      <DialogContent className="w-full h-full md:w-[92vw] md:max-w-md md:h-auto p-0 overflow-hidden bg-background">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-primary/10">
           <div className="flex items-center gap-3">
             <img src={ispkLogo} alt="ISPK" className="h-10 w-10 rounded-xl object-cover border border-primary/40" />
@@ -203,7 +203,7 @@ const ChatBotFloating = () => {
           </div>
         </div>
 
-        <div className="flex h-[60vh] flex-col bg-background">
+        <div className="flex h-full md:h-[60vh] flex-col bg-background">
           <div ref={chatListRef} className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.map((message, index) => (
               <div
