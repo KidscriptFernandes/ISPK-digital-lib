@@ -5,7 +5,11 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
 import {
+<<<<<<< HEAD
   LayoutDashboard, BookOpen, Library, Search, Settings, LogOut, BookMarked, LogIn, Users, ShieldCheck, TrendingUp, ClipboardList, ImageIcon, Bot, FolderTree,
+=======
+  LayoutDashboard, BookOpen, Library, Search, Settings, LogOut, BookMarked, LogIn, Users, ShieldCheck, TrendingUp, ClipboardList, ImageIcon,
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import ispkLogo from "@/assets/ispk-logo.jpg";
@@ -18,7 +22,10 @@ const publicItems = [
 const authItems = [
   { title: "Início", url: "/inicio", icon: LayoutDashboard },
   { title: "Catálogo", url: "/catalogo", icon: BookOpen },
+<<<<<<< HEAD
   { title: "Kate", url: "/assistente", icon: Bot },
+=======
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   { title: "Prateleiras", url: "/prateleiras", icon: Library },
   { title: "Meus Empréstimos", url: "/emprestimos", icon: ClipboardList },
   { title: "Pesquisa", url: "/pesquisa", icon: Search },
@@ -27,7 +34,11 @@ const authItems = [
 const adminItems = [
   { title: "Dashboard Admin", url: "/admin", icon: TrendingUp },
   { title: "Gestão de Livros", url: "/admin/livros", icon: BookMarked },
+<<<<<<< HEAD
   { title: "Subcategorias", url: "/admin/subcategorias", icon: FolderTree },
+=======
+  { title: "Empréstimos", url: "/admin/emprestimos", icon: ClipboardList },
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   { title: "Carrossel", url: "/admin/carrossel", icon: ImageIcon },
   { title: "Utilizadores", url: "/admin/utilizadores", icon: Users },
   { title: "Administradores", url: "/admin/administradores", icon: ShieldCheck },

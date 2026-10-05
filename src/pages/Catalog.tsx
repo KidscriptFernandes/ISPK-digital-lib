@@ -16,15 +16,22 @@ const Catalog = () => {
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(searchParams.get("cat") || "all");
+<<<<<<< HEAD
   const [subcategoryFilter, setSubcategoryFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [books, setBooks] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
+=======
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [books, setBooks] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
+<<<<<<< HEAD
       const [booksRes, catsRes, subsRes] = await Promise.all([
         supabase.from("books").select("*, categories(name), subcategories(name)").order("title"),
         supabase.from("categories").select("*").order("name"),
@@ -33,11 +40,20 @@ const Catalog = () => {
       setBooks(booksRes.data || []);
       setCategories(catsRes.data || []);
       setSubcategories(subsRes.data || []);
+=======
+      const [booksRes, catsRes] = await Promise.all([
+        supabase.from("books").select("*, categories(name)").order("title"),
+        supabase.from("categories").select("*").order("name"),
+      ]);
+      setBooks(booksRes.data || []);
+      setCategories(catsRes.data || []);
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
       setLoading(false);
     }
     load();
   }, []);
 
+<<<<<<< HEAD
   const visibleSubcategories = categoryFilter === "all"
     ? []
     : subcategories.filter((s) => s.category_id === categoryFilter);
@@ -52,6 +68,12 @@ const Catalog = () => {
     const matchCat = categoryFilter === "all" || b.category_id === categoryFilter;
     const matchSub = subcategoryFilter === "all" || b.subcategory_id === subcategoryFilter;
     return matchSearch && matchCat && matchSub;
+=======
+  const filtered = books.filter((b) => {
+    const matchSearch = b.title.toLowerCase().includes(search.toLowerCase()) || b.author.toLowerCase().includes(search.toLowerCase());
+    const matchCat = categoryFilter === "all" || b.category_id === categoryFilter;
+    return matchSearch && matchCat;
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   });
 
   if (loading) {
@@ -71,7 +93,11 @@ const Catalog = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Pesquisar por título ou autor..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
           </div>
+<<<<<<< HEAD
           <Select value={categoryFilter} onValueChange={handleCategoryChange}>
+=======
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
             <SelectTrigger className="w-full sm:w-48">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Categoria" />
@@ -81,6 +107,7 @@ const Catalog = () => {
               {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
+<<<<<<< HEAD
           {visibleSubcategories.length > 0 && (
             <Select value={subcategoryFilter} onValueChange={setSubcategoryFilter}>
               <SelectTrigger className="w-full sm:w-48">
@@ -92,6 +119,8 @@ const Catalog = () => {
               </SelectContent>
             </Select>
           )}
+=======
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
           <div className="flex gap-1">
             <Button variant={viewMode === "grid" ? "default" : "outline"} size="icon" onClick={() => setViewMode("grid")}><Grid3X3 className="h-4 w-4" /></Button>
             <Button variant={viewMode === "list" ? "default" : "outline"} size="icon" onClick={() => setViewMode("list")}><List className="h-4 w-4" /></Button>
@@ -112,10 +141,14 @@ const Catalog = () => {
                     <CardContent className="p-3">
                       <p className="font-medium text-foreground text-sm line-clamp-1">{book.title}</p>
                       <p className="text-xs text-muted-foreground">{book.author} · {book.publication_year}</p>
+<<<<<<< HEAD
                       <div className="flex flex-wrap gap-1 mt-1">
                         <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{book.categories?.name}</span>
                         {book.subcategories?.name && <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{book.subcategories.name}</span>}
                       </div>
+=======
+                      <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{book.categories?.name}</span>
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                     </CardContent>
                   </Card>
                 </Link>
@@ -134,10 +167,14 @@ const Catalog = () => {
                         <p className="font-medium text-foreground">{book.title}</p>
                         <p className="text-sm text-muted-foreground">{book.author} · {book.publication_year}</p>
                         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{book.description}</p>
+<<<<<<< HEAD
                         <div className="flex flex-wrap gap-1 mt-1">
                           <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{book.categories?.name}</span>
                           {book.subcategories?.name && <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{book.subcategories.name}</span>}
                         </div>
+=======
+                        <span className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{book.categories?.name}</span>
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                       </div>
                     </CardContent>
                   </Card>

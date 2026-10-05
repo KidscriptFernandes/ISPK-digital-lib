@@ -21,13 +21,21 @@ const ResetPassword = () => {
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
+<<<<<<< HEAD
     const t = hashParams.get("type");
     if (t === "recovery" || t === "invite") {
+=======
+    if (hashParams.get("type") === "recovery") {
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
       setIsRecovery(true);
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+<<<<<<< HEAD
       if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && (t === "invite" || t === "recovery"))) {
+=======
+      if (event === "PASSWORD_RECOVERY") {
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
         setIsRecovery(true);
       }
     });

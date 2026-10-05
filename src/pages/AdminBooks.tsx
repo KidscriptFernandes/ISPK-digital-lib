@@ -16,17 +16,27 @@ const AdminBooks = () => {
   const { toast } = useToast();
   const [books, setBooks] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
+<<<<<<< HEAD
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+=======
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editingBook, setEditingBook] = useState<any | null>(null);
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
 
   // Form state
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [year, setYear] = useState("");
   const [catId, setCatId] = useState("");
+<<<<<<< HEAD
   const [subCatId, setSubCatId] = useState("");
+=======
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   const [description, setDescription] = useState("");
   const [isbn, setIsbn] = useState("");
   const [pages, setPages] = useState("");
@@ -40,6 +50,7 @@ const AdminBooks = () => {
   useEffect(() => { fetchData(); }, []);
 
   async function fetchData() {
+<<<<<<< HEAD
     const [booksRes, catsRes, subsRes] = await Promise.all([
       supabase.from("books").select("*, categories(name), subcategories(name)").order("title"),
       supabase.from("categories").select("*").order("name"),
@@ -48,6 +59,14 @@ const AdminBooks = () => {
     setBooks(booksRes.data || []);
     setCategories(catsRes.data || []);
     setSubcategories(subsRes.data || []);
+=======
+    const [booksRes, catsRes] = await Promise.all([
+      supabase.from("books").select("*, categories(name)").order("title"),
+      supabase.from("categories").select("*").order("name"),
+    ]);
+    setBooks(booksRes.data || []);
+    setCategories(catsRes.data || []);
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
     setLoading(false);
   }
 
@@ -102,12 +121,21 @@ const AdminBooks = () => {
     if (!title || !author) return;
     setSaving(true);
 
+<<<<<<< HEAD
     let pdfUrl: string | null = null;
     let coverUrl: string | null = null;
     const timestamp = Date.now();
 
     try {
       // Upload PDF
+=======
+    let pdfUrl: string | null = editingBook?.pdf_url || null;
+    let coverUrl: string | null = editingBook?.cover_image_url || null;
+    const timestamp = Date.now();
+
+    try {
+      // Upload PDF if it was changed
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
       if (pdfFile) {
         const pdfPath = `pdfs/${timestamp}-${pdfFile.name}`;
         const { error: pdfError } = await supabase.storage.from("books").upload(pdfPath, pdfFile, { contentType: "application/pdf" });
@@ -116,7 +144,11 @@ const AdminBooks = () => {
         pdfUrl = pdfPublic.publicUrl;
       }
 
+<<<<<<< HEAD
       // Upload cover
+=======
+      // Upload cover if it was changed
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
       if (coverFile) {
         const coverPath = `covers/${timestamp}-cover.jpg`;
         const { error: coverError } = await supabase.storage.from("books").upload(coverPath, coverFile, { contentType: coverFile.type });
@@ -125,11 +157,19 @@ const AdminBooks = () => {
         coverUrl = coverPublic.publicUrl;
       }
 
+<<<<<<< HEAD
       const { error } = await supabase.from("books").insert({
         title, author,
         publication_year: year ? parseInt(year) : null,
         category_id: catId || null,
         subcategory_id: subCatId || null,
+=======
+      const bookPayload = {
+        title,
+        author,
+        publication_year: year ? parseInt(year) : null,
+        category_id: catId || null,
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
         description: description || null,
         isbn: isbn || null,
         pages: pages ? parseInt(pages) : null,
@@ -137,12 +177,25 @@ const AdminBooks = () => {
         cover_image_url: coverUrl,
         digital: !!pdfUrl,
         access_type: accessType as any,
+<<<<<<< HEAD
       });
 
       if (error) {
         toast({ title: "Erro", description: error.message, variant: "destructive" });
       } else {
         toast({ title: "Livro adicionado com sucesso" });
+=======
+      };
+
+      const result = editingBook
+        ? await supabase.from("books").update(bookPayload).eq("id", editingBook.id)
+        : await supabase.from("books").insert(bookPayload);
+
+      if (result.error) {
+        toast({ title: "Erro", description: result.error.message, variant: "destructive" });
+      } else {
+        toast({ title: editingBook ? "Livro atualizado" : "Livro adicionado com sucesso" });
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
         resetForm();
         setDialogOpen(false);
         fetchData();
@@ -154,14 +207,45 @@ const AdminBooks = () => {
   }
 
   function resetForm() {
+<<<<<<< HEAD
     setTitle(""); setAuthor(""); setYear(""); setCatId(""); setSubCatId(""); setDescription(""); setIsbn(""); setPages("");
+=======
+    setEditingBook(null);
+    setTitle(""); setAuthor(""); setYear(""); setCatId(""); setDescription(""); setIsbn(""); setPages("");
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
     setAccessType("online_public"); setPdfFile(null); setCoverFile(null); setCoverPreview(null);
   }
 
   async function deleteBook(id: string) {
+<<<<<<< HEAD
     await supabase.from("books").delete().eq("id", id);
     toast({ title: "Livro removido" });
     fetchData();
+=======
+    const { error } = await supabase.from("books").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao eliminar livro", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Livro removido" });
+      fetchData();
+    }
+  }
+
+  function editBook(book: any) {
+    setEditingBook(book);
+    setTitle(book.title || "");
+    setAuthor(book.author || "");
+    setYear(book.publication_year ? String(book.publication_year) : "");
+    setCatId(book.category_id || "");
+    setDescription(book.description || "");
+    setIsbn(book.isbn || "");
+    setPages(book.pages ? String(book.pages) : "");
+    setAccessType(book.access_type || "online_public");
+    setCoverFile(null);
+    setPdfFile(null);
+    setCoverPreview(book.cover_image_url || null);
+    setDialogOpen(true);
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   }
 
   if (loading) {
@@ -181,7 +265,11 @@ const AdminBooks = () => {
               <Button className="gap-2"><Plus className="h-4 w-4" /> Novo Livro</Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+<<<<<<< HEAD
               <DialogHeader><DialogTitle>Adicionar Livro</DialogTitle></DialogHeader>
+=======
+              <DialogHeader><DialogTitle>{editingBook ? "Editar Livro" : "Adicionar Livro"}</DialogTitle></DialogHeader>
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
               <div className="space-y-4">
                 <div className="space-y-2"><Label>Título *</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título do livro" /></div>
                 <div className="space-y-2"><Label>Autor *</Label><Input value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Nome do autor" /></div>
@@ -189,7 +277,11 @@ const AdminBooks = () => {
                   <div className="space-y-2"><Label>Ano</Label><Input type="number" value={year} onChange={(e) => setYear(e.target.value)} placeholder="2024" /></div>
                   <div className="space-y-2">
                     <Label>Categoria</Label>
+<<<<<<< HEAD
                     <Select value={catId} onValueChange={(v) => { setCatId(v); setSubCatId(""); }}>
+=======
+                    <Select value={catId} onValueChange={setCatId}>
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                       <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
                       <SelectContent>
                         {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -197,6 +289,7 @@ const AdminBooks = () => {
                     </Select>
                   </div>
                 </div>
+<<<<<<< HEAD
                 {catId && subcategories.some((s) => s.category_id === catId) && (
                   <div className="space-y-2">
                     <Label>Subcategoria</Label>
@@ -208,6 +301,8 @@ const AdminBooks = () => {
                     </Select>
                   </div>
                 )}
+=======
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2"><Label>ISBN</Label><Input value={isbn} onChange={(e) => setIsbn(e.target.value)} placeholder="ISBN" /></div>
                   <div className="space-y-2"><Label>Páginas</Label><Input type="number" value={pages} onChange={(e) => setPages(e.target.value)} placeholder="Nº páginas" /></div>
@@ -312,6 +407,7 @@ const AdminBooks = () => {
                       {book.access_type === "physical_only" && <span className="text-orange-600">🏫 Físico</span>}
                       {!book.access_type && <span className="text-muted-foreground">📖 Visitantes</span>}
                     </TableCell>
+<<<<<<< HEAD
                     <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                       {book.categories?.name}
                       {book.subcategories?.name && <span className="block text-xs text-primary/80">{book.subcategories.name}</span>}
@@ -319,6 +415,12 @@ const AdminBooks = () => {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
+=======
+                    <TableCell className="hidden md:table-cell text-sm text-muted-foreground">{book.categories?.name}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => editBook(book)}><Pencil className="h-4 w-4" /></Button>
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                         <Button variant="ghost" size="icon" className="text-destructive" onClick={() => deleteBook(book.id)}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </TableCell>

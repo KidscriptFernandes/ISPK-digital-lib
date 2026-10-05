@@ -69,7 +69,11 @@ const Landing = () => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
+<<<<<<< HEAD
       options: { data: { full_name: name }, emailRedirectTo: `${window.location.origin}/inicio` },
+=======
+      options: { data: { full_name: name }, emailRedirectTo: 'https://ispk-digital-lib.vercel.app/inicio' },
+>>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
     });
     if (error) {
       toast({ title: "Erro ao registar", description: error.message, variant: "destructive" });
