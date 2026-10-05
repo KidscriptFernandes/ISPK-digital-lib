@@ -13,24 +13,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-<<<<<<< HEAD
 import { adminCall, type ManagedUser } from "@/lib/adminApi";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 type AdminRow = ManagedUser;
-=======
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-
-interface AdminRow {
-  id: string;
-  user_id: string;
-  full_name: string | null;
-  created_at: string;
-}
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
 
 const AdminManagers = () => {
   const { toast } = useToast();
@@ -40,46 +27,22 @@ const AdminManagers = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-<<<<<<< HEAD
-=======
-  const [password, setPassword] = useState("");
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { fetchAdmins(); }, []);
 
   async function fetchAdmins() {
     setLoading(true);
-<<<<<<< HEAD
     try {
       const { users } = await adminCall<{ users: AdminRow[] }>({ action: "list_users" });
       setAdmins(users.filter(u => u.role === "admin"));
     } catch (e) {
       toast({ title: "Erro ao carregar administradores", description: (e as Error).message, variant: "destructive" });
     }
-=======
-    const { data: adminRoles } = await supabase.from("user_roles").select("user_id, created_at").eq("role", "admin");
-    if (!adminRoles || adminRoles.length === 0) { setLoading(false); return; }
-
-    const userIds = adminRoles.map(r => r.user_id);
-    const { data: profiles } = await supabase.from("profiles").select("id, user_id, full_name").in("user_id", userIds);
-
-    const merged: AdminRow[] = adminRoles.map(r => {
-      const profile = profiles?.find(p => p.user_id === r.user_id);
-      return {
-        id: profile?.id || r.user_id,
-        user_id: r.user_id,
-        full_name: profile?.full_name || null,
-        created_at: r.created_at,
-      };
-    });
-    setAdmins(merged);
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
     setLoading(false);
   }
 
   async function createAdmin() {
-<<<<<<< HEAD
     if (!email || !name) return;
     setSaving(true);
     try {
@@ -93,37 +56,6 @@ const AdminManagers = () => {
     } catch (e) {
       toast({ title: "Erro ao criar administrador", description: (e as Error).message, variant: "destructive" });
     }
-=======
-    if (!email || !password || !name) return;
-    setSaving(true);
-    
-    // Sign up the new admin user
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: name } },
-    });
-
-    if (signUpError || !signUpData.user) {
-      toast({ title: "Erro", description: signUpError?.message || "Erro ao criar conta", variant: "destructive" });
-      setSaving(false);
-      return;
-    }
-
-    // Promote to admin (update role from student to admin)
-    const { error: roleError } = await supabase.from("user_roles")
-      .update({ role: "admin" })
-      .eq("user_id", signUpData.user.id);
-
-    if (roleError) {
-      // Try insert if update didn't work (user might not have a role yet)
-      await supabase.from("user_roles").insert({ user_id: signUpData.user.id, role: "admin" });
-    }
-
-    toast({ title: "Administrador criado!", description: `${name} foi adicionado como administrador.` });
-    setEmail(""); setName(""); setPassword(""); setDialogOpen(false);
-    fetchAdmins();
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
     setSaving(false);
   }
 
@@ -132,7 +64,6 @@ const AdminManagers = () => {
       toast({ title: "Ação inválida", description: "Não pode remover a sua própria conta de administrador.", variant: "destructive" });
       return;
     }
-<<<<<<< HEAD
     try {
       const r = await adminCall<{ message: string }>({ action: "demote_admin", user_id: userId });
       toast({ title: "Privilégios removidos", description: r.message });
@@ -140,12 +71,6 @@ const AdminManagers = () => {
     } catch (e) {
       toast({ title: "Erro", description: (e as Error).message, variant: "destructive" });
     }
-=======
-    // Downgrade to student instead of deleting
-    await supabase.from("user_roles").update({ role: "student" }).eq("user_id", userId);
-    toast({ title: "Privilégios removidos", description: "O utilizador foi rebaixado para aluno." });
-    fetchAdmins();
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   }
 
   return (
@@ -186,14 +111,7 @@ const AdminManagers = () => {
                     <Label>Email</Label>
                     <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@ispk.ac.ao" />
                   </div>
-<<<<<<< HEAD
                   <p className="text-xs text-muted-foreground">Será enviado um email de convite. O novo administrador define a sua própria senha através do link.</p>
-=======
-                  <div className="space-y-2">
-                    <Label>Palavra-passe</Label>
-                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" />
-                  </div>
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                   <div className="rounded-xl bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 p-3">
                     <p className="text-xs text-violet-700 dark:text-violet-300 font-medium">
                       ⚠ Esta conta terá acesso total ao sistema. Certifique-se de que esta pessoa é de confiança.
@@ -202,15 +120,9 @@ const AdminManagers = () => {
                   <Button
                     className="w-full bg-gradient-to-r from-violet-600 to-purple-700 hover:from-violet-700 hover:to-purple-800"
                     onClick={createAdmin}
-<<<<<<< HEAD
                     disabled={saving || !email || !name}
                   >
                     {saving ? "A enviar convite..." : "Enviar convite"}
-=======
-                    disabled={saving || !email || !password || !name}
-                  >
-                    {saving ? "A criar..." : "Criar Administrador"}
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                   </Button>
                 </div>
               </DialogContent>
@@ -257,11 +169,7 @@ const AdminManagers = () => {
                     </TableRow>
                   ) : admins.map((admin, i) => (
                     <motion.tr
-<<<<<<< HEAD
                       key={admin.user_id}
-=======
-                      key={admin.id}
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.06 }}
@@ -274,11 +182,8 @@ const AdminManagers = () => {
                           </div>
                           <div>
                             <p className="font-medium text-sm">{admin.full_name || <span className="italic text-muted-foreground">Sem nome</span>}</p>
-<<<<<<< HEAD
                             <p className="text-xs text-muted-foreground">{admin.email}</p>
                             {!admin.last_sign_in_at && <p className="text-xs text-amber-600 font-medium">Convite pendente</p>}
-=======
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                             {admin.user_id === user?.id && (
                               <p className="text-xs text-violet-600 font-medium">Você</p>
                             )}

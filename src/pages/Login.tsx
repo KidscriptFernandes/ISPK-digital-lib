@@ -44,7 +44,6 @@ const Login = () => {
     loadStats();
   }, []);
 
-<<<<<<< HEAD
   const rawNext = searchParams.get("next");
   const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/inicio";
 
@@ -54,10 +53,6 @@ const Login = () => {
       return null;
     }
     navigate(nextPath, { replace: true });
-=======
-  if (user) {
-    navigate("/inicio", { replace: true });
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
     return null;
   }
 
@@ -69,25 +64,16 @@ const Login = () => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
-<<<<<<< HEAD
       } else if (nextPath.startsWith("/.lovable/")) {
         window.location.href = nextPath;
       } else {
         navigate(nextPath);
-=======
-      } else {
-        navigate("/inicio");
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
       }
     } else {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-<<<<<<< HEAD
         options: { data: { full_name: name }, emailRedirectTo: `${window.location.origin}${nextPath}` },
-=======
-        options: { data: { full_name: name }, emailRedirectTo: 'https://ispk-digital-lib.vercel.app/inicio' },
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
       });
       if (error) {
         toast({ title: "Erro ao registar", description: error.message, variant: "destructive" });
@@ -173,11 +159,7 @@ const Login = () => {
                   }
                   setLoading(true);
                   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-<<<<<<< HEAD
                     redirectTo: `${window.location.origin}/reset-password`,
-=======
-                    redirectTo: 'https://ispk-digital-lib.vercel.app/reset-password',
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                   });
                   if (error) {
                     toast({ title: "Erro", description: error.message, variant: "destructive" });

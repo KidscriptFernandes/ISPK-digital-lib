@@ -1,15 +1,9 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-<<<<<<< HEAD
 import { Bell, User, LogOut, Settings, BookOpen, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
-=======
-import { Bell, User, LogOut, Settings, BookOpen } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
 import { Link, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -38,11 +32,8 @@ export function AppLayout({ children }: AppLayoutProps) {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const [notifOpen, setNotifOpen] = useState(false);
-<<<<<<< HEAD
   const { theme, setTheme } = useTheme();
 
-=======
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
 
   // Fetch active loans as notifications
   const { data: loans } = useQuery({
@@ -100,7 +91,6 @@ export function AppLayout({ children }: AppLayoutProps) {
               </span>
             </div>
             <div className="flex items-center gap-2">
-<<<<<<< HEAD
               <Button
                 variant="ghost"
                 size="icon"
@@ -111,8 +101,6 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               </Button>
-=======
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
               {user ? (
                 <>
                   {/* Notifications */}

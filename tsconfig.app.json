@@ -16,11 +16,6 @@
     "noImplicitAny": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-<<<<<<< HEAD
-=======
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
     "paths": {
       "@/*": [
         "./src/*"

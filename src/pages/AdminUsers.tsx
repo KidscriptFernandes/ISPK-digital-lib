@@ -6,38 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AppLayout } from "@/components/AppLayout";
-<<<<<<< HEAD
 import { Search, Trash2, ShieldOff, Users, UserCheck, Ban, Unlock } from "lucide-react";
 import { adminCall, type ManagedUser } from "@/lib/adminApi";
 import { useAuth } from "@/hooks/useAuth";
-=======
-import { Search, Trash2, ShieldOff, Users, UserCheck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-<<<<<<< HEAD
 type UserRow = ManagedUser;
 
 const AdminUsers = () => {
   const { toast } = useToast();
   const { user: me } = useAuth();
-=======
-interface UserRow {
-  id: string;
-  user_id: string;
-  full_name: string | null;
-  created_at: string;
-  role: string;
-}
-
-const AdminUsers = () => {
-  const { toast } = useToast();
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   const [users, setUsers] = useState<UserRow[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -46,7 +28,6 @@ const AdminUsers = () => {
 
   async function fetchUsers() {
     setLoading(true);
-<<<<<<< HEAD
     try {
       const { users } = await adminCall<{ users: UserRow[] }>({ action: "list_users" });
       setUsers(users);
@@ -68,60 +49,6 @@ const AdminUsers = () => {
 
   const filtered = users.filter(u =>
     `${u.full_name || ""} ${u.email || ""}`.toLowerCase().includes(search.toLowerCase())
-=======
-    const { data: profiles } = await supabase.from("profiles").select("id, user_id, full_name, created_at");
-    const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-
-    if (!profiles) { setLoading(false); return; }
-
-    const roleMap: Record<string, string> = {};
-    (roles || []).forEach(r => { roleMap[r.user_id] = r.role; });
-
-    const merged: UserRow[] = profiles.map(p => ({
-      id: p.id,
-      user_id: p.user_id,
-      full_name: p.full_name,
-      created_at: p.created_at,
-      role: roleMap[p.user_id] || "student",
-    }));
-
-    setUsers(merged);
-    setLoading(false);
-  }
-
-  async function removeUser(userId: string) {
-    setLoading(true);
-
-    const { error: rolesError } = await supabase.from("user_roles").delete().eq("user_id", userId);
-    if (rolesError) {
-      toast({
-        title: "Erro ao remover papel do usuário",
-        description: rolesError.message,
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
-    const { error: profileError } = await supabase.from("profiles").delete().eq("user_id", userId);
-    if (profileError) {
-      toast({
-        title: "Erro ao remover perfil do usuário",
-        description: profileError.message,
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
-    toast({ title: "Utilizador removido" });
-    await fetchUsers();
-    setLoading(false);
-  }
-
-  const filtered = users.filter(u =>
-    (u.full_name || "").toLowerCase().includes(search.toLowerCase())
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
   );
 
   const students = users.filter(u => u.role === "student").length;
@@ -164,11 +91,7 @@ const AdminUsers = () => {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-<<<<<<< HEAD
             placeholder="Pesquisar por nome ou email..."
-=======
-            placeholder="Pesquisar por nome..."
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -201,11 +124,7 @@ const AdminUsers = () => {
                     </TableRow>
                   ) : filtered.map((u, i) => (
                     <motion.tr
-<<<<<<< HEAD
                       key={u.user_id}
-=======
-                      key={u.id}
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.04 }}
@@ -216,14 +135,10 @@ const AdminUsers = () => {
                           <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-bold">
                             {(u.full_name || "?").charAt(0).toUpperCase()}
                           </div>
-<<<<<<< HEAD
                           <div>
                             <p className="font-medium text-sm">{u.full_name || <span className="text-muted-foreground italic">Sem nome</span>}</p>
                             <p className="text-xs text-muted-foreground">{u.email}</p>
                           </div>
-=======
-                          <span className="font-medium text-sm">{u.full_name || <span className="text-muted-foreground italic">Sem nome</span>}</span>
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
@@ -237,7 +152,6 @@ const AdminUsers = () => {
                             <><UserCheck className="h-3 w-3 mr-1" />Aluno</>
                           )}
                         </Badge>
-<<<<<<< HEAD
                         {u.banned && <Badge variant="destructive" className="text-xs ml-1">Restrito</Badge>}
                         {!u.confirmed && <Badge variant="outline" className="text-xs ml-1">Por confirmar</Badge>}
                       </TableCell>
@@ -246,10 +160,6 @@ const AdminUsers = () => {
                         <Button variant="ghost" size="icon" title={u.banned ? "Desbloquear" : "Restringir"} onClick={() => run(u.banned ? "unrestrict_user" : "restrict_user", u.user_id)}>
                           {u.banned ? <Unlock className="h-4 w-4" /> : <Ban className="h-4 w-4" />}
                         </Button>
-=======
-                      </TableCell>
-                      <TableCell className="text-right">
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
@@ -265,20 +175,13 @@ const AdminUsers = () => {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-<<<<<<< HEAD
                               <AlertDialogAction onClick={() => run("delete_user", u.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-=======
-                              <AlertDialogAction onClick={() => removeUser(u.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                                 Remover
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
-<<<<<<< HEAD
                         </>}
-=======
->>>>>>> d4bc625e72d3a0b3bf650380eb1fa65146def7de
                       </TableCell>
                     </motion.tr>
                   ))}
